@@ -1,0 +1,59 @@
+Steps for Amazon RDS
+
+1. Launching an RDS Instance
+Go to RDS Console → Click Create Database
+Select Standard Create
+Choose Engine Type: e.g., MySQL
+Choose the latest engine version
+Choose Templates:
+Free tier / Production / Dev/Test (as required)
+Set DB Instance Identifier
+Set Master Username & Password
+
+2. Configuring RDS Connectivity
+Choose DB Instance Class → e.g., db.t3.micro
+Choose Storage Type (General Purpose, etc.)
+Configure Allocated Storage
+Select VPC where RDS should launch
+Select Subnet Group (collection of subnets in different AZs)
+Keep Public Access = No (recommended for security)
+Choose Existing VPC Security Group or create a new one
+In Security Group, allow inbound MySQL/Aurora (port 3306) only from:
+EC2 instances
+or application layer security group
+
+3. Additional Configuration
+Set Initial Database Name
+Enable/Disable:
+Automated Backups
+Encryption
+Monitoring
+Maintenance window
+Click Create Database
+
+4. Connecting EC2 to RDS (Migration to RDS)
+Copy RDS Endpoint
+Install MySQL client on EC2 server:
+
+sudo yum install mariadb -y   (Amazon Linux)
+
+mysql -h <RDS-endpoint> -u admin -p
+
+Create required DB / Tables:
+create database appdb;
+
+After testing connection, update application configuration to use RDS endpoint instead of local database.
+
+
+RDS Security Group Rules
+In RDS SG → Add inbound rule:
+Type: MySQL/Aurora
+Port: 3306
+Source: EC2 security group (recommended)
+
+Application Layer Update
+Add DB details in application configuration file:
+DB hostname (RDS endpoint)
+DB username
+DB password
+Restart application service to apply new DB connectivity.
