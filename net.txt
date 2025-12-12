@@ -1,0 +1,103 @@
+VPC
+VPC and more (because we are creating instances — one public and one private)
+Name: static-web-vpc
+NAT Gateways
+In 1 AZ
+Customize Subnet CIDR blocks
+10.0.0.0/24
+10.0.2.0/24
+10.0.1.0/24
+10.0.3.0/24
+(Used to identify the subnets)
+Create VPC
+View VPC
+AWS Keys
+Download .pem file
+
+cd Downloads
+sudo chmod 600 <labuser>.pem
+
+EC2 – Launch EC2 (Public Instance)
+Name: we-server
+OS: Ubuntu / Ubuntu 24
+Instance type: t2.micro
+VPC: static-web-VPC
+Subnet: Public subnet
+Security Group: websg
+ - SSH → Anywhere
+ - HTTP → Anywhere
+Click Launch Instance
+
+EC2 – Private Instance (DB Server)
+Create EC2
+Name: db-server
+OS: Ubuntu / Ubuntu 24
+Instance type: t2.micro
+VPC: static-web-VPC
+Subnet: Private subnet
+Security Group: dbsg
+ - MySQL/Aurora
+ - Custom
+ - websg
+
+ -ssh
+ -custom
+-websg
+
+
+sudo scp -i labuser.pem labuser.pem ubuntu@<public-ip>:/home/ubuntu/
+sudo ssh -i labuser.pem ubuntu@<public-ip>
+
+On web server
+sudo apt-get update -y
+sudo git clone Cafe-Dynamic-Website
+sudo apt-get install php
+sudo apt-get install apache2 libapache2-mod-php php-mysql mysql-client -y
+cd Cafe-Dynamic-Website
+cd mom_pop_cafe
+sudo rm -rf /var/www/html/index.html
+sudo cp -r * /var/www/html
+sudo systemctl restart apache2
+
+sudo ssh -i <labuser>.pem ubuntu@<private-ip-address>
+On DB server
+
+sudo nano /etc/mysql/mysql.conf.d/
+Edit bind-address → 0.0.0.0
+sudo systemctl restart mysql
+sudo mysql -u root
+create database cafedb;
+create user 'msis'@'%' identified with mysql_native_password by 'msis@123';
+grant all privileges on cafedb.* to 'msis'@'%';
+exit;
+exit;
+
+On web server
+
+cd Cafe-Dynamic-Website
+ls
+cd mom_pop_db
+
+sudo mysql -h <privateaddress> -u msis -p
+(-h IP)
+use cafedb;
+show tables;
+source create-db.sql;
+show tables;
+exit;
+
+cd
+sudo nano /var/www/html/getparameters.php
+Update values:
+db url: private IP address
+db name: cafedb
+db user: msis
+db password: msis@123
+
+sudo systemctl restart apache2
+
+
+
+
+
+
